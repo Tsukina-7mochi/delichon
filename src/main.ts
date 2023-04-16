@@ -1,7 +1,7 @@
 import { fs, posix } from '../deps.ts';
 import { semver } from '../deps.ts';
 import * as fileResolver from './fileResolver.ts';
-import { default as moduleTypes, Module } from './moduleTypes.ts';
+import { Module } from './moduleTypes.ts';
 import * as moduleNameParser from './moduleNameParser.ts';
 import pkgResolverMap from './pkgResolver.ts';
 
