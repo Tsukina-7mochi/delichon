@@ -44,7 +44,7 @@ const denoNpmModuleParser: ModuleNameParser = {
       type: moduleTypes.npmPackage,
       name,
       version,
-    }
+    };
   },
 };
 

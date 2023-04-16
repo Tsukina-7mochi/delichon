@@ -26,7 +26,7 @@ interface ModuleVersionCheckOptions {
 type ModuleVersionCheckResult = {
   fixed: boolean;
   outdated: 'major' | 'minor' | 'patch' | 'pre_release' | 'none' | 'not_found';
-  latest: string | null,
+  latest: string | null;
 };
 
 const versionsCache = new Map<string, SemVer[] | null>();
@@ -146,7 +146,7 @@ const checkModuleVersion = async function (
   return {
     fixed: versionFixed,
     outdated,
-    latest: latestVer?.version ?? null
+    latest: latestVer?.version ?? null,
   };
 };
 
@@ -201,7 +201,7 @@ const main = async function () {
 
   // remove duplications
   const moduleMap = new Map<string, Module>();
-  for(const module of modules) {
+  for (const module of modules) {
     moduleMap.set(`${module.type}-${module.name}`, module);
   }
   modules = [...moduleMap.values()];
@@ -214,25 +214,27 @@ const main = async function () {
       usePrerelease: false,
     });
 
-    if(result === null) {
+    if (result === null) {
       console.log(`❔${module.name} cannot be resolved`);
-    } else if(result.outdated === 'not_found') {
+    } else if (result.outdated === 'not_found') {
       console.log(`❔ ${module.name} not found on remote`);
-    } else if(result.outdated === 'none') {
-      if(result.fixed) {
+    } else if (result.outdated === 'none') {
+      if (result.fixed) {
         console.log(`✅ ${module.name} is up to date`);
       } else {
         console.log(`⚠️ ${module.name} may up to date (version not fixed)`);
       }
     } else {
-      if(result.fixed) {
+      if (result.fixed) {
         console.log(`❌ ${module.name} is outdated (${result.outdated})`);
       } else {
-        console.log(`❌ ${module.name} is outdated (${result.outdated}) and version is not fixed`);
+        console.log(
+          `❌ ${module.name} is outdated (${result.outdated}) and version is not fixed`,
+        );
       }
     }
 
-    if(result !== null) {
+    if (result !== null) {
       results.push([
         module,
         result,
@@ -244,22 +246,32 @@ const main = async function () {
   const outdatedModules = results.filter(([, result]) => {
     return result.outdated !== 'none' && result.outdated !== 'not_found';
   });
-  const notFoundModules = results.filter(([_, result]) => result.outdated === 'not_found');
+  const notFoundModules = results.filter(([_, result]) =>
+    result.outdated === 'not_found'
+  );
   const notFixedModules = results.filter(([_, result]) => !result.fixed);
 
   console.log();
-  console.log(`\x1b[1m${outdatedModules.length}\x1b[0m module${outdatedModules.length > 1 ? 's are' : ' is'} outdated.`);
-  if(notFoundModules.length > 0) {
+  console.log(
+    `\x1b[1m${outdatedModules.length}\x1b[0m module${
+      outdatedModules.length > 1 ? 's are' : ' is'
+    } outdated.`,
+  );
+  if (notFoundModules.length > 0) {
     console.log('Could not find following modules:');
-    console.log('  ' + notFoundModules.map(([module]) => module.name).join(', '));
+    console.log(
+      '  ' + notFoundModules.map(([module]) => module.name).join(', '),
+    );
   }
-  if(notFixedModules.length > 0) {
+  if (notFixedModules.length > 0) {
     console.log('Version not fixed at following modules:');
-    console.log('  ' + notFixedModules.map(([module]) => module.name).join(', '));
+    console.log(
+      '  ' + notFixedModules.map(([module]) => module.name).join(', '),
+    );
   }
 
   let logTable: string[][] = [
-    ['', 'package', 'current', 'latest']
+    ['', 'package', 'current', 'latest'],
   ];
   const outdatedTextMap = {
     'major': '\x1b[31mMajor\x1b[0m',
@@ -269,9 +281,9 @@ const main = async function () {
     'none': 'Latest',
     'not_found': 'Not Found',
   };
-  for(const [module, result] of outdatedModules) {
+  for (const [module, result] of outdatedModules) {
     logTable.push([
-      `${outdatedTextMap[result.outdated]     }`,
+      `${outdatedTextMap[result.outdated]}`,
       module.name,
       module.version ?? '(null)',
       result.latest ?? '(null)',
@@ -279,9 +291,16 @@ const main = async function () {
   }
   const colWidths = new Array(logTable[0].length)
     .fill(0)
-    .map((_, i) => logTable.reduce((max, arr) => arr[i].length > max ? arr[i].length : max, 0));
+    .map((_, i) =>
+      logTable.reduce(
+        (max, arr) => arr[i].length > max ? arr[i].length : max,
+        0,
+      )
+    );
 
-  logTable = logTable.map((arr) => arr.map((v, i) => `${v}${' '.repeat(colWidths[i])}`.slice(0, colWidths[i])));
+  logTable = logTable.map((arr) =>
+    arr.map((v, i) => `${v}${' '.repeat(colWidths[i])}`.slice(0, colWidths[i]))
+  );
   // adjust for ANSI escape sequence
   colWidths[0] = 5;
   logTable[0][0] = '     ';
