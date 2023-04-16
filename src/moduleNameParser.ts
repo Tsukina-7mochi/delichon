@@ -1,8 +1,9 @@
 import { decomposePackageNameVersion } from './util.ts';
+import { default as moduleTypes, Module } from './moduleTypes.ts';
 
 interface ModuleNameParser {
   test: RegExp;
-  parse: (moduleName: string) => [string, string, string];
+  parse: (moduleName: string) => Module;
 }
 
 const denoLandUrlParser: ModuleNameParser = {
@@ -10,11 +11,13 @@ const denoLandUrlParser: ModuleNameParser = {
   parse: (moduleName) => {
     const path = new URL(moduleName).pathname.split('/').slice(1);
     const pkgStr = path[0] === 'x' ? path[1] : path[0];
+    const [name, version] = decomposePackageNameVersion(pkgStr);
 
-    return [
-      'deno_land',
-      ...decomposePackageNameVersion(pkgStr),
-    ];
+    return {
+      type: moduleTypes.denoLand,
+      name,
+      version,
+    };
   },
 };
 
@@ -22,20 +25,26 @@ const rawGitHubUrlParser: ModuleNameParser = {
   test: /^https?:\/\/raw.githubusercontent.com/,
   parse: (moduleName) => {
     const path = new URL(moduleName).pathname.split('/').slice(1);
-    const pkgName = `${path[0]}/${path[1]}`;
-    const pkgVersion = path[2];
+    const name = `${path[0]}/${path[1]}`;
+    const version = path[2];
 
-    return ['raw_github', pkgName, pkgVersion];
+    return {
+      type: moduleTypes.rawGitHub,
+      name,
+      version,
+    };
   },
 };
 
 const denoNpmModuleParser: ModuleNameParser = {
   test: /^npm:/,
   parse: (moduleName) => {
-    return [
-      'npm_package',
-      ...decomposePackageNameVersion(moduleName.slice(4)),
-    ];
+    const [name, version] = decomposePackageNameVersion(moduleName.slice(4));
+    return {
+      type: moduleTypes.npmPackage,
+      name,
+      version,
+    }
   },
 };
 

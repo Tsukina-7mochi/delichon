@@ -1,4 +1,5 @@
 import { ModuleNameParser, parseModuleName } from './moduleNameParser.ts';
+import { default as moduleTypes, Module } from './moduleTypes.ts';
 
 interface Importmap {
   imports?: { [key: string]: string };
@@ -12,36 +13,44 @@ type PackageJson = Required<{
   devDependencies: { [key: string]: string };
 }>;
 
-/** type, pkg name, version */
-type FileResolveResult = [string, string, string | null];
-
-const parseModuleNameWrapper = function (
-  moduleName: string,
-  parsers: ModuleNameParser[],
-): FileResolveResult {
-  return parseModuleName(moduleName, parsers) ?? ['unknown', moduleName, null];
-};
-
-const resolvePackageJson = function (content: string): FileResolveResult[] {
+const resolvePackageJson = function (content: string): Module[] {
   const packageJson = JSON.parse(content) as PackageJson;
 
   // TODO: support imports other than npm
-  const results: FileResolveResult[] = [];
-  for (const key in packageJson.dependencies) {
-    const value = packageJson.dependencies[key];
-    results.push(['npm_package', key, packageJson.dependencies[key]]);
+  const results: Module[] = [];
+  for (const name in packageJson.dependencies) {
+    results.push({
+      type: moduleTypes.npmPackage,
+      name,
+      version: packageJson.dependencies[name],
+    });
   }
-  for (const key in packageJson.devDependencies) {
-    results.push(['npm_package', key, packageJson.devDependencies[key]]);
+  for (const name in packageJson.devDependencies) {
+    results.push({
+      type: moduleTypes.npmPackage,
+      name,
+      version: packageJson.devDependencies[name],
+    });
   }
 
   return results;
 };
 
+const parseModuleNameWrapper = function (
+  moduleName: string,
+  parsers: ModuleNameParser[],
+): Module {
+  return parseModuleName(moduleName, parsers) ?? {
+    type: moduleTypes.unknown,
+    name: moduleName,
+    version: null,
+  };
+};
+
 const resolveImportMap = function (
   content: string,
   parsers: ModuleNameParser[],
-): FileResolveResult[] {
+): Module[] {
   const importmap = JSON.parse(content) as Importmap;
 
   const moduleNames = [
@@ -60,7 +69,7 @@ const resolveImportMap = function (
 const resolveDenoModuleNameStrings = function (
   content: string,
   parsers: ModuleNameParser[],
-): FileResolveResult[] {
+): Module[] {
   const regExps = [
     /"https?:\/\/[\w/:%#\$&\?\(\)~\.=\+\-@]+"/g,
     /'https?:\/\/[\w/:%#\$&\?\(\)~\.=\+\-@]+'/g,
@@ -77,7 +86,5 @@ const resolveDenoModuleNameStrings = function (
     parseModuleNameWrapper(moduleName, parsers)
   );
 };
-
-export type { FileResolveResult };
 
 export { resolveDenoModuleNameStrings, resolveImportMap, resolvePackageJson };

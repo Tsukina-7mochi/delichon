@@ -1,7 +1,7 @@
 import { fs, posix } from '../deps.ts';
 import { semver } from '../deps.ts';
 import * as fileResolver from './fileResolver.ts';
-import { FileResolveResult } from './fileResolver.ts';
+import { default as moduleTypes, Module } from './moduleTypes.ts';
 import * as moduleNameParser from './moduleNameParser.ts';
 import pkgResolverMap from './pkgResolver.ts';
 
@@ -51,24 +51,23 @@ const getLargestVersion = (versions: SemVer[]) =>
   versions.reduce((max, ver) => semver.gt(ver, max) ? ver : max);
 
 const checkModuleVersion = async function (
-  module: FileResolveResult,
+  module: Module,
   options: ModuleVersionCheckOptions,
 ): Promise<ModuleVersionCheckResult | null> {
-  const [type_, name, version_] = module;
-  const pkgVersion = version_ ?? '';
+  const pkgVersion = module.version ?? '';
   const versionFixed = semver.parse(pkgVersion) !== null;
 
-  if (!(type_ in pkgResolverMap)) {
+  if (!(module.type in pkgResolverMap)) {
     return null;
   }
-  const type = type_ as keyof typeof pkgResolverMap;
+  const type = module.type as keyof typeof pkgResolverMap;
 
   const additionalArgs = [];
   if (type === 'raw_github' && typeof options?.gitHubToken === 'string') {
     additionalArgs.push(options.gitHubToken);
   }
 
-  let versionList = await getVersions(type, name, ...additionalArgs);
+  let versionList = await getVersions(type, module.name, ...additionalArgs);
   if (versionList === null) {
     return {
       fixed: versionFixed,
@@ -168,7 +167,7 @@ const main = async function () {
   }
 
   // gather modules from files
-  let modules: FileResolveResult[] = [];
+  let modules: Module[] = [];
   for await (const [path, globName] of enumerateFiles(Deno.cwd(), fileGlobs)) {
     console.log(`Scanning ${path}...`);
 
@@ -201,36 +200,35 @@ const main = async function () {
   }
 
   // remove duplications
-  const moduleMap = new Map<string, FileResolveResult>();
+  const moduleMap = new Map<string, Module>();
   for(const module of modules) {
-    moduleMap.set(`${module[0]}-${module[1]}`, module);
+    moduleMap.set(`${module.type}-${module.name}`, module);
   }
   modules = [...moduleMap.values()];
 
   // check updates
-  const results: [FileResolveResult, ModuleVersionCheckResult][] = [];
+  const results: [Module, ModuleVersionCheckResult][] = [];
   for (const module of modules) {
     const result = await checkModuleVersion(module, {
       level: 'major',
       usePrerelease: false,
     });
-    const name = module[1];
 
     if(result === null) {
-      console.log(`❔${name} cannot be resolved`);
+      console.log(`❔${module.name} cannot be resolved`);
     } else if(result.outdated === 'not_found') {
-      console.log(`❔ ${name} not found on remote`);
+      console.log(`❔ ${module.name} not found on remote`);
     } else if(result.outdated === 'none') {
       if(result.fixed) {
-        console.log(`✅ ${name} is up to date`);
+        console.log(`✅ ${module.name} is up to date`);
       } else {
-        console.log(`⚠️ ${name} may up to date (version not fixed)`);
+        console.log(`⚠️ ${module.name} may up to date (version not fixed)`);
       }
     } else {
       if(result.fixed) {
-        console.log(`❌ ${name} is outdated (${result.outdated})`);
+        console.log(`❌ ${module.name} is outdated (${result.outdated})`);
       } else {
-        console.log(`❌ ${name} is outdated (${result.outdated}) and version is not fixed`);
+        console.log(`❌ ${module.name} is outdated (${result.outdated}) and version is not fixed`);
       }
     }
 
@@ -253,11 +251,11 @@ const main = async function () {
   console.log(`\x1b[1m${outdatedModules.length}\x1b[0m module${outdatedModules.length > 1 ? 's are' : ' is'} outdated.`);
   if(notFoundModules.length > 0) {
     console.log('Could not find following modules:');
-    console.log('  ' + notFoundModules.map(([module]) => module[1]).join(', '));
+    console.log('  ' + notFoundModules.map(([module]) => module.name).join(', '));
   }
   if(notFixedModules.length > 0) {
     console.log('Version not fixed at following modules:');
-    console.log('  ' + notFixedModules.map(([module]) => module[1]).join(', '));
+    console.log('  ' + notFixedModules.map(([module]) => module.name).join(', '));
   }
 
   let logTable: string[][] = [
@@ -274,8 +272,8 @@ const main = async function () {
   for(const [module, result] of outdatedModules) {
     logTable.push([
       `${outdatedTextMap[result.outdated]     }`,
-      module[1],
-      module[2] ?? '(null)',
+      module.name,
+      module.version ?? '(null)',
       result.latest ?? '(null)',
     ]);
   }
