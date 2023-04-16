@@ -1,11 +1,7 @@
 import { fs, posix } from '../deps.ts';
-import { semver } from '../deps.ts';
-import * as fileResolver from './fileResolver.ts';
 import { Module } from './moduleTypes.ts';
-import * as moduleNameParser from './moduleNameParser.ts';
 import checkModuleVersion, { ModuleVersionCheckResult } from './moduleVersionChecker.ts';
-
-type SemVer = semver.SemVer;
+import { configurations as fileConfigs } from './files.ts';
 
 const enumerateFiles = async function* (basePath: string, files: string[]) {
   for (const filename of files) {
@@ -18,60 +14,30 @@ const enumerateFiles = async function* (basePath: string, files: string[]) {
 };
 
 const main = async function () {
-  let fileGlobs = [
-    'package.json',
-  ];
-
-  // add configurations for deno
-  const isDeno = fs.existsSync(posix.resolve('deno.json'), { isFile: true }) ||
-    fs.existsSync(posix.resolve('deno.jsonc'), { isFile: true });
-  if (isDeno) {
-    fileGlobs = [
-      ...fileGlobs,
-      'import_map.json',
-      '**/deps.ts',
-    ];
+  const cwd = Deno.cwd();
+  const fileGlobs: string[] = [];
+  for(const config of fileConfigs) {
+    if(config.enabled === undefined || config.enabled(cwd)) {
+      fileGlobs.push(config.file);
+    }
   }
 
   // gather modules from files
-  let modules: Module[] = [];
-  for await (const [path, globName] of enumerateFiles(Deno.cwd(), fileGlobs)) {
+  const moduleMap = new Map<string, Module>();
+  for await (const [path, globName] of enumerateFiles(cwd, fileGlobs)) {
     console.log(`Scanning ${path}...`);
 
     const content = await Deno.readTextFile(path);
 
-    if (globName === 'package.json') {
-      modules = [
-        ...modules,
-        ...fileResolver.resolvePackageJson(content),
-      ];
-    } else if (globName === 'import_map.json') {
-      modules = [
-        ...modules,
-        ...fileResolver.resolveImportMap(content, [
-          moduleNameParser.denoLandUrlParser,
-          moduleNameParser.rawGitHubUrlParser,
-          moduleNameParser.denoNpmModuleParser,
-        ]),
-      ];
-    } else if (globName === '**/deps.ts') {
-      modules = [
-        ...modules,
-        ...fileResolver.resolveDenoModuleNameStrings(content, [
-          moduleNameParser.denoLandUrlParser,
-          moduleNameParser.rawGitHubUrlParser,
-          moduleNameParser.denoNpmModuleParser,
-        ]),
-      ];
+    for(const config of fileConfigs) {
+      if(config.file === globName) {
+        config.resolver(content).forEach((module) => {
+          moduleMap.set(`${module.type}-${module.name}`, module);
+        });
+      }
     }
   }
-
-  // remove duplications
-  const moduleMap = new Map<string, Module>();
-  for (const module of modules) {
-    moduleMap.set(`${module.type}-${module.name}`, module);
-  }
-  modules = [...moduleMap.values()];
+  const modules = [...moduleMap.values()];
 
   // check updates
   const results: [Module, ModuleVersionCheckResult][] = [];
