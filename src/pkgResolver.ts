@@ -1,4 +1,5 @@
 import { semver } from '../deps.ts';
+import moduleTypes from './moduleTypes.ts';
 
 type SemVer = semver.SemVer;
 
@@ -60,9 +61,9 @@ const resolveRawGitHubContent = async function (
 };
 
 const pkgResolverMap = {
-  'npm_package': resolveNpmPackage,
-  'deno_land': resolveDenoLandPackage,
-  'raw_github': resolveRawGitHubContent,
+  [moduleTypes.npmPackage]: resolveNpmPackage,
+  [moduleTypes.denoLand]: resolveDenoLandPackage,
+  [moduleTypes.rawGitHub]: resolveRawGitHubContent,
 };
 
 export { resolveDenoLandPackage, resolveNpmPackage, resolveRawGitHubContent };
