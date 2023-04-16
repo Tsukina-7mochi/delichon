@@ -3,7 +3,7 @@ import { semver } from '../deps.ts';
 import * as fileResolver from './fileResolver.ts';
 import { Module } from './moduleTypes.ts';
 import * as moduleNameParser from './moduleNameParser.ts';
-import checkModuleVersion from './moduleVersionChecker.ts';
+import checkModuleVersion, { ModuleVersionCheckResult } from './moduleVersionChecker.ts';
 
 type SemVer = semver.SemVer;
 
