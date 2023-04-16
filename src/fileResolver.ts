@@ -59,8 +59,6 @@ const resolveImportMap = function (
       .flatMap((map) => Object.values(map)),
   ];
 
-  console.log(moduleNames);
-
   return moduleNames.map((moduleName) =>
     parseModuleNameWrapper(moduleName, parsers)
   );
