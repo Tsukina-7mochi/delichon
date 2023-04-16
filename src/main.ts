@@ -2,6 +2,7 @@ import { fs, posix } from '../deps.ts';
 import { Module } from './moduleTypes.ts';
 import checkModuleVersion, { ModuleVersionCheckResult } from './moduleVersionChecker.ts';
 import { configurations as fileConfigs } from './files.ts';
+import { cliffy } from '../deps.ts';
 
 const enumerateFiles = async function* (basePath: string, files: string[]) {
   for (const filename of files) {
@@ -14,6 +15,24 @@ const enumerateFiles = async function* (basePath: string, files: string[]) {
 };
 
 const main = async function () {
+  const command = new cliffy.Command()
+    .name('deps-scanner-js')
+    .description('Dependency scanner for Node.js and Deno project')
+    .option('-l, --level [level:string]', 'version update limit', {
+      default: 'major'
+    })
+    .option('--prerelease', 'use prerelease')
+    .arguments('[path]');
+
+  const { options, args } = await command.parse(Deno.args);
+  let level_ = (typeof options.level === 'string') ? options.level.toLowerCase() : options.level;
+  if(level_ !== 'major' && level_ !== 'minor' && level_ !== 'patch') {
+    console.error(`${level_} is not a valid level.`);
+    Deno.exit(1);
+  }
+  const level = level_ as 'major' | 'minor' | 'patch';
+  const usePrerelease = options.prerelease === true;
+
   const cwd = Deno.cwd();
   const fileGlobs: string[] = [];
   for(const config of fileConfigs) {
@@ -43,8 +62,8 @@ const main = async function () {
   const results: [Module, ModuleVersionCheckResult][] = [];
   for (const module of modules) {
     const result = await checkModuleVersion(module, {
-      level: 'major',
-      usePrerelease: false,
+      level,
+      usePrerelease,
     });
 
     if (result === null) {
