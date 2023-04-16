@@ -48,9 +48,9 @@ const main = async function () {
     });
 
     if (result === null) {
-      console.log(`❔${module.name} cannot be resolved`);
+      console.log(`❔${module.name} cannot be resolved (${module.type})`);
     } else if (result.outdated === 'not_found') {
-      console.log(`❔ ${module.name} not found on remote`);
+      console.log(`❔ ${module.name} not found on remote (${module.type})`);
     } else if (result.outdated === 'none') {
       if (result.fixed) {
         console.log(`✅ ${module.name} is up to date`);
@@ -103,44 +103,46 @@ const main = async function () {
     );
   }
 
-  let logTable: string[][] = [
-    ['', 'package', 'current', 'latest'],
-  ];
-  const outdatedTextMap = {
-    'major': '\x1b[31mMajor\x1b[0m',
-    'minor': '\x1b[33mMinor\x1b[0m',
-    'patch': '\x1b[34mPatch\x1b[0m',
-    'pre_release': '\x1b[36mPre\x1b[0m',
-    'none': 'Latest',
-    'not_found': 'Not Found',
-  };
-  for (const [module, result] of outdatedModules) {
-    logTable.push([
-      `${outdatedTextMap[result.outdated]}`,
-      module.name,
-      module.version ?? '(null)',
-      result.latest ?? '(null)',
-    ]);
-  }
-  const colWidths = new Array(logTable[0].length)
-    .fill(0)
-    .map((_, i) =>
-      logTable.reduce(
-        (max, arr) => arr[i].length > max ? arr[i].length : max,
-        0,
-      )
+  if(outdatedModules.length > 0) {
+    let logTable: string[][] = [
+      ['', 'package', 'current', 'latest'],
+    ];
+    const outdatedTextMap = {
+      'major': '\x1b[31mMajor\x1b[0m',
+      'minor': '\x1b[33mMinor\x1b[0m',
+      'patch': '\x1b[34mPatch\x1b[0m',
+      'pre_release': '\x1b[36mPre\x1b[0m',
+      'none': 'Latest',
+      'not_found': 'Not Found',
+    };
+    for (const [module, result] of outdatedModules) {
+      logTable.push([
+        `${outdatedTextMap[result.outdated]}`,
+        module.name,
+        module.version ?? '(null)',
+        result.latest ?? '(null)',
+      ]);
+    }
+    const colWidths = new Array(logTable[0].length)
+      .fill(0)
+      .map((_, i) =>
+        logTable.reduce(
+          (max, arr) => arr[i].length > max ? arr[i].length : max,
+          0,
+        )
+      );
+
+    logTable = logTable.map((arr) =>
+      arr.map((v, i) => `${v}${' '.repeat(colWidths[i])}`.slice(0, colWidths[i]))
     );
+    // adjust for ANSI escape sequence
+    colWidths[0] = 5;
+    logTable[0][0] = '     ';
 
-  logTable = logTable.map((arr) =>
-    arr.map((v, i) => `${v}${' '.repeat(colWidths[i])}`.slice(0, colWidths[i]))
-  );
-  // adjust for ANSI escape sequence
-  colWidths[0] = 5;
-  logTable[0][0] = '     ';
-
-  console.log(logTable[0].join(' '));
-  console.log(colWidths.map((len) => '-'.repeat(len)).join(' '));
-  console.log(logTable.slice(1).map((arr) => arr.join(' ')).join('\n'));
+    console.log(logTable[0].join(' '));
+    console.log(colWidths.map((len) => '-'.repeat(len)).join(' '));
+    console.log(logTable.slice(1).map((arr) => arr.join(' ')).join('\n'));
+  }
 };
 
 export default main;
