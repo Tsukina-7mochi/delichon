@@ -46,14 +46,14 @@ const resolveRawGitHubContent = async function (
   }
 
   const res = await fetch(
-    `https://api.github.com/repos/${repoName}/releases/`,
+    `https://api.github.com/repos/${repoName}/releases`,
     { headers },
   );
   if (!res.ok) {
     return null;
   }
-  const data = JSON.parse(await res.text());
-  const versions = (data as Required<{ tag_name: string }>[])
+  const data = JSON.parse(await res.text()) as Required<{ tag_name: string }>[];
+  const versions = (data)
     .map((v) => semver.parse(v.tag_name))
     .filter((v) => v !== null) as SemVer[];
 
