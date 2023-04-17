@@ -12,5 +12,5 @@ Dependency scanner for Typescript/Javascript project
 ## Usage
 
 ```sh
-$deno run --allow-read --allow-net https://raw.githubusercontent.com/Tsukina-7mochi/delichon/main/mod.ts
+$deno run --allow-read --allow-net https://raw.githubusercontent.com/Tsukina-7mochi/delichon/deploy/mod.js
 ```
