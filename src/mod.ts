@@ -22,16 +22,18 @@ const main = async function () {
   const appVersionCheckResult = await checkModuleVersion({
     type: 'raw_github',
     name: appInfo.repository,
-    version: appInfo.version
+    version: appInfo.version,
   }, {
     usePrerelease: false,
     level: 'major',
   });
-  if(appVersionCheckResult
-    && appVersionCheckResult.outdated !== 'none') {
-      if(appVersionCheckResult.outdated !== 'not_found') {
-        console.log(`Update ${appVersionCheckResult.latest} found`);
-        console.log('You can update with $\x1b[33mdeno cache --reload\x1b[0m');
+  if (
+    appVersionCheckResult &&
+    appVersionCheckResult.outdated !== 'none'
+  ) {
+    if (appVersionCheckResult.outdated !== 'not_found') {
+      console.log(`Update ${appVersionCheckResult.latest} found`);
+      console.log('You can update with $\x1b[33mdeno cache --reload\x1b[0m');
     }
   }
 
