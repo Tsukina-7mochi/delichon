@@ -6,6 +6,7 @@ import checkModuleVersion, {
   ModuleVersionCheckResult,
 } from './moduleVersionChecker.ts';
 import { configurations as fileConfigs } from './files.ts';
+import appInfo from '../app.json' assert { type: 'json' };
 
 const enumerateFiles = async function* (basePath: string, files: string[]) {
   for (const filename of files) {
@@ -18,8 +19,25 @@ const enumerateFiles = async function* (basePath: string, files: string[]) {
 };
 
 const main = async function () {
+  const appVersionCheckResult = await checkModuleVersion({
+    type: 'raw_github',
+    name: appInfo.repository,
+    version: appInfo.version
+  }, {
+    usePrerelease: false,
+    level: 'major',
+  });
+  if(appVersionCheckResult
+    && appVersionCheckResult.outdated !== 'none') {
+      if(appVersionCheckResult.outdated !== 'not_found') {
+        console.log(`Update ${appVersionCheckResult.latest} found`);
+        console.log('You can update with $\x1b[33mdeno cache --reload\x1b[0m');
+    }
+  }
+
   const command = new cliffy.Command()
-    .name('deps-scanner-js')
+    .name(appInfo.name)
+    .version(appInfo.version)
     .description('Dependency scanner for Node.js and Deno project')
     .option('-l, --level [level:string]', 'version update limit', {
       default: 'major',
