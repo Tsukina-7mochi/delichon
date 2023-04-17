@@ -1,4 +1,5 @@
-import { fs, posix } from "../deps.ts";
+import * as fs from "fs";
+import * as posix from "posix";
 import { Module } from "./moduleTypes.ts"
 import * as moduleNameParser from './moduleNameParser.ts';
 import * as fileResolver from './fileResolver.ts';

@@ -1,8 +1,9 @@
-import { fs, posix } from '../deps.ts';
+import * as fs from "fs";
+import * as posix from "posix";
+import * as cliffy from "cliffy";
 import { Module } from './moduleTypes.ts';
 import checkModuleVersion, { ModuleVersionCheckResult } from './moduleVersionChecker.ts';
 import { configurations as fileConfigs } from './files.ts';
-import { cliffy } from '../deps.ts';
 
 const enumerateFiles = async function* (basePath: string, files: string[]) {
   for (const filename of files) {
@@ -164,4 +165,4 @@ const main = async function () {
   }
 };
 
-export default main;
+main();

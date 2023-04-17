@@ -33,5 +33,9 @@
       "singleQuote": true,
       "useTabs": false
     }
+  },
+  "tasks": {
+    "build": "deno run --allow-net --allow-read --allow-write --allow-env --allow-run --importmap import_map.json build.ts",
+    "clean": "rm -rf ./dist ./cache"
   }
 }

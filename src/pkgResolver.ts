@@ -1,7 +1,6 @@
-import { semver } from '../deps.ts';
+import * as semver from "semver";
+import { SemVer } from "semver";
 import moduleTypes from './moduleTypes.ts';
-
-type SemVer = semver.SemVer;
 
 const resolveNpmPackage = async function (pkgName: string) {
   const url = `https://registry.npmjs.org/${pkgName}`;

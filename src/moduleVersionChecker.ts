@@ -1,8 +1,7 @@
-import { semver } from '../deps.ts';
+import * as semver from "semver";
+import { SemVer } from "semver";
 import { Module } from './moduleTypes.ts';
 import pkgResolverMap from './pkgResolver.ts';
-
-type SemVer = semver.SemVer;
 
 interface ModuleVersionCheckOptions {
   level: 'major' | 'minor' | 'patch';
