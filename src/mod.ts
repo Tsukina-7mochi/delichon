@@ -47,7 +47,7 @@ const main = async function () {
     .option('--prerelease', 'use prerelease')
     .arguments('[path]');
 
-  const { options } = await command.parse(Deno.args);
+  const { options, args } = await command.parse(Deno.args);
   const level_ = (typeof options.level === 'string')
     ? options.level.toLowerCase()
     : options.level;
@@ -58,7 +58,7 @@ const main = async function () {
   const level = level_ as 'major' | 'minor' | 'patch';
   const usePrerelease = options.prerelease === true;
 
-  const cwd = Deno.cwd();
+  const cwd = args.filter((v) => typeof v === 'string')[0] ?? Deno.cwd();
   const fileGlobs: string[] = [];
   for (const config of fileConfigs) {
     if (config.enabled === undefined || config.enabled(cwd)) {
