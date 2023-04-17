@@ -2,6 +2,23 @@ import * as semver from 'semver';
 import { SemVer } from 'semver';
 import moduleTypes from './moduleTypes.ts';
 
+const getLargestVersion = (versions: SemVer[]) =>
+  versions.reduce((max, ver) => semver.gt(ver, max) ? ver : max);
+
+const calcLatestVersionRange = function(refVer: SemVer, level: 'major' | 'minor' | 'patch') {
+  let range = `>=${refVer}`;
+
+  if(level === 'major') {
+    // do nothing
+  } else if(level === 'minor') {
+    range += ` <=${refVer.major}`;
+  } else if(level === 'patch') {
+    range += ` <=${refVer.major}.${refVer.minor}`;
+  }
+
+  return range;
+}
+
 const resolveNpmPackage = async function (pkgName: string) {
   const url = `https://registry.npmjs.org/${pkgName}`;
   const res = await fetch(url);
@@ -59,12 +76,61 @@ const resolveRawGitHubContent = async function (
   return versions;
 };
 
-const pkgResolverMap = {
-  [moduleTypes.npmPackage]: resolveNpmPackage,
-  [moduleTypes.denoLand]: resolveDenoLandPackage,
-  [moduleTypes.rawGitHub]: resolveRawGitHubContent,
+interface GetVersionsOptions {
+  level: 'major' | 'minor' | 'patch';
+  usePrerelease: boolean;
+  gitHubToken?: string;
+}
+const versionListCache = new Map<string, SemVer[] | null>();
+const getLatestVersions = async function (
+  type: typeof moduleTypes[keyof typeof moduleTypes],
+  name: string,
+  version: string,
+  options: GetVersionsOptions
+) {
+  const semverOption = { includePrerelease: options.usePrerelease };
+  if(type === moduleTypes.denoLand || type === moduleTypes.npmPackage || type === moduleTypes.rawGitHub) {
+    const cacheName = type + ':' + name;
+    const cachedVersionList = versionListCache.get(cacheName);
+
+    let versionList: SemVer[] | null = null;
+    if (typeof cachedVersionList !== 'undefined') {
+      versionList = cachedVersionList;
+    } else {
+      if(type === moduleTypes.denoLand) {
+        versionList = await resolveDenoLandPackage(name);
+      } else if(type === moduleTypes.npmPackage) {
+        versionList = await resolveNpmPackage(name);
+      } else if(type === moduleTypes.rawGitHub) {
+        versionList = await resolveRawGitHubContent(name, options.gitHubToken);
+      }
+
+      versionListCache.set(cacheName, versionList);
+    }
+
+    if(versionList === null || versionList.length < 1) {
+      return null;
+    }
+
+    const versionListInRange = versionList
+      .filter((ver) => semver.satisfies(ver, version, semverOption));
+    if(versionListInRange.length < 1) {
+      return null;
+    }
+    const latestInRange = getLargestVersion(versionListInRange);
+
+
+    const versionGreaterRange = calcLatestVersionRange(latestInRange, options.level);
+    const versionListGreater = versionList
+      .filter((ver) => semver.satisfies(ver, versionGreaterRange, semverOption));
+
+    return {
+      latest: getLargestVersion(versionListGreater),
+      latestInRange: latestInRange,
+    };
+  }
+
+  return null;
 };
 
-export { resolveDenoLandPackage, resolveNpmPackage, resolveRawGitHubContent };
-
-export default pkgResolverMap;
+export { getLatestVersions };
