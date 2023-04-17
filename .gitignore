@@ -1,6 +1,9 @@
 # Cache directory
 /cache
 
+# build destination directory
+/dist
+
 *.orig
 *.pyc
 *.swp
