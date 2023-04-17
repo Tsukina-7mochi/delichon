@@ -27,8 +27,8 @@ const main = async function () {
     .option('--prerelease', 'use prerelease')
     .arguments('[path]');
 
-  const { options, args } = await command.parse(Deno.args);
-  let level_ = (typeof options.level === 'string')
+  const { options } = await command.parse(Deno.args);
+  const level_ = (typeof options.level === 'string')
     ? options.level.toLowerCase()
     : options.level;
   if (level_ !== 'major' && level_ !== 'minor' && level_ !== 'patch') {
