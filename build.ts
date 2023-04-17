@@ -1,8 +1,40 @@
 import * as esbuild from "esbuild";
 import * as posix from "posix";
-import esbuildCachePlugin from "esbuild-plugin-cache";
 import esbuildResultPlugin from "esbuild-plugin-result";
 import importmap from "./import_map.json" assert { type: "json" };
+
+interface Importmap {
+  imports?: { [key: string]: string };
+  scopes?: {
+    [key: string]: { [key: string]: string };
+  };
+}
+
+const importmapAsExternalPlugin = (importmap: Importmap): esbuild.Plugin => ({
+  name: 'importmap-as-external',
+  setup(build) {
+    const imports = importmap.imports ?? {};
+    const scopes = importmap.scopes ?? {};
+
+    for(const name in imports) {
+      const filter = new RegExp(`^${name}$`);
+      build.onResolve({ filter }, () => ({
+        external: true,
+        path: imports[name]
+      }));
+    }
+
+    for(const scope in scopes) {
+      for(const name in scopes[scope]) {
+        const filter = new RegExp(`^${name}$`);
+        build.onResolve({ filter }, () => ({
+          external: true,
+          path: imports[name]
+        }));
+      }
+    }
+  },
+})
 
 await esbuild.build({
   entryPoints: [posix.resolve('src', 'mod.ts')],
@@ -10,14 +42,10 @@ await esbuild.build({
   outdir: posix.resolve('dist'),
   plugins: [
     esbuildResultPlugin(),
-    esbuildCachePlugin({
-      directory: posix.resolve('cache'),
-      importmap,
-      rules: [
-        { test: /\.ts$/, loader: 'ts' },
-      ],
-    }),
+    importmapAsExternalPlugin(importmap),
   ],
+  platform: 'neutral',
+  target: 'deno1',
   minify: true,
   sourcemap: 'external',
 });
