@@ -1,8 +1,10 @@
-import * as fs from "fs";
-import * as posix from "posix";
-import * as cliffy from "cliffy";
+import * as fs from 'fs';
+import * as posix from 'posix';
+import * as cliffy from 'cliffy';
 import { Module } from './moduleTypes.ts';
-import checkModuleVersion, { ModuleVersionCheckResult } from './moduleVersionChecker.ts';
+import checkModuleVersion, {
+  ModuleVersionCheckResult,
+} from './moduleVersionChecker.ts';
 import { configurations as fileConfigs } from './files.ts';
 
 const enumerateFiles = async function* (basePath: string, files: string[]) {
@@ -20,14 +22,16 @@ const main = async function () {
     .name('deps-scanner-js')
     .description('Dependency scanner for Node.js and Deno project')
     .option('-l, --level [level:string]', 'version update limit', {
-      default: 'major'
+      default: 'major',
     })
     .option('--prerelease', 'use prerelease')
     .arguments('[path]');
 
   const { options, args } = await command.parse(Deno.args);
-  let level_ = (typeof options.level === 'string') ? options.level.toLowerCase() : options.level;
-  if(level_ !== 'major' && level_ !== 'minor' && level_ !== 'patch') {
+  let level_ = (typeof options.level === 'string')
+    ? options.level.toLowerCase()
+    : options.level;
+  if (level_ !== 'major' && level_ !== 'minor' && level_ !== 'patch') {
     console.error(`${level_} is not a valid level.`);
     Deno.exit(1);
   }
@@ -36,8 +40,8 @@ const main = async function () {
 
   const cwd = Deno.cwd();
   const fileGlobs: string[] = [];
-  for(const config of fileConfigs) {
-    if(config.enabled === undefined || config.enabled(cwd)) {
+  for (const config of fileConfigs) {
+    if (config.enabled === undefined || config.enabled(cwd)) {
       fileGlobs.push(config.file);
     }
   }
@@ -49,8 +53,8 @@ const main = async function () {
 
     const content = await Deno.readTextFile(path);
 
-    for(const config of fileConfigs) {
-      if(config.file === globName) {
+    for (const config of fileConfigs) {
+      if (config.file === globName) {
         config.resolver(content).forEach((module) => {
           moduleMap.set(`${module.type}-${module.name}`, module);
         });
@@ -123,7 +127,7 @@ const main = async function () {
     );
   }
 
-  if(outdatedModules.length > 0) {
+  if (outdatedModules.length > 0) {
     let logTable: string[][] = [
       ['', 'package', 'current', 'latest'],
     ];
@@ -153,7 +157,9 @@ const main = async function () {
       );
 
     logTable = logTable.map((arr) =>
-      arr.map((v, i) => `${v}${' '.repeat(colWidths[i])}`.slice(0, colWidths[i]))
+      arr.map((v, i) =>
+        `${v}${' '.repeat(colWidths[i])}`.slice(0, colWidths[i])
+      )
     );
     // adjust for ANSI escape sequence
     colWidths[0] = 5;

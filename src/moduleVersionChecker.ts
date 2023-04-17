@@ -1,5 +1,5 @@
-import * as semver from "semver";
-import { SemVer } from "semver";
+import * as semver from 'semver';
+import { SemVer } from 'semver';
 import { Module } from './moduleTypes.ts';
 import pkgResolverMap from './pkgResolver.ts';
 
@@ -136,6 +136,6 @@ const checkModuleVersion = async function (
   };
 };
 
-export type { ModuleVersionCheckOptions, ModuleVersionCheckResult }
+export type { ModuleVersionCheckOptions, ModuleVersionCheckResult };
 
 export default checkModuleVersion;

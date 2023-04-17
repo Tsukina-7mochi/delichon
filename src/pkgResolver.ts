@@ -1,5 +1,5 @@
-import * as semver from "semver";
-import { SemVer } from "semver";
+import * as semver from 'semver';
+import { SemVer } from 'semver';
 import moduleTypes from './moduleTypes.ts';
 
 const resolveNpmPackage = async function (pkgName: string) {
