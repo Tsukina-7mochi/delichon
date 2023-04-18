@@ -24,9 +24,9 @@ const checkModuleVersion = async function (
     module.type,
     module.name,
     module.version ?? '',
-    options
+    options,
   );
-  if(latestVersions === null) {
+  if (latestVersions === null) {
     return {
       fixed: versionFixed,
       outdated: 'not_found',

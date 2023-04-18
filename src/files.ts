@@ -31,12 +31,13 @@ const isDenoProject = (cwd: string) => {
   return false;
 };
 
-const denoFileResolver = (content: string) => fileResolver.resolveImportMap(content, [
-  moduleNameParser.denoLandUrlParser,
-  moduleNameParser.rawGitHubUrlParser,
-  moduleNameParser.denoNpmModuleParser,
-  moduleNameParser.esmShModuleParser,
-]);
+const denoFileResolver = (content: string) =>
+  fileResolver.resolveImportMap(content, [
+    moduleNameParser.denoLandUrlParser,
+    moduleNameParser.rawGitHubUrlParser,
+    moduleNameParser.denoNpmModuleParser,
+    moduleNameParser.esmShModuleParser,
+  ]);
 
 const npmPackageJson: FileConfig = {
   file: 'package.json',

@@ -57,10 +57,10 @@ const esmShModuleParser: ModuleNameParser = {
     return {
       type: moduleTypes.esmSh,
       name,
-      version
+      version,
     };
-  }
-}
+  },
+};
 
 const parseModuleName = function (
   url: string,
@@ -80,7 +80,7 @@ export type { ModuleNameParser };
 export {
   denoLandUrlParser,
   denoNpmModuleParser,
+  esmShModuleParser,
   parseModuleName,
   rawGitHubUrlParser,
-  esmShModuleParser,
 };

@@ -6,19 +6,22 @@ import { decomposePackageNameVersion } from './util.ts';
 const getLargestVersion = (versions: SemVer[]) =>
   versions.reduce((max, ver) => semver.gt(ver, max) ? ver : max);
 
-const calcLatestVersionRange = function(refVer: SemVer, level: 'major' | 'minor' | 'patch') {
+const calcLatestVersionRange = function (
+  refVer: SemVer,
+  level: 'major' | 'minor' | 'patch',
+) {
   let range = `>=${refVer}`;
 
-  if(level === 'major') {
+  if (level === 'major') {
     // do nothing
-  } else if(level === 'minor') {
+  } else if (level === 'minor') {
     range += ` <=${refVer.major}`;
-  } else if(level === 'patch') {
+  } else if (level === 'patch') {
     range += ` <=${refVer.major}.${refVer.minor}`;
   }
 
   return range;
-}
+};
 
 const resolveNpmPackage = async function (pkgName: string) {
   const url = `https://registry.npmjs.org/${pkgName}`;
@@ -77,32 +80,32 @@ const resolveRawGitHubContent = async function (
   return versions;
 };
 
-const getEsmShVersion = async function(url: string) {
+const getEsmShVersion = async function (url: string) {
   const moduleNameRegExp = /^\/\* esm.sh - (\S+) \*\//;
   const res = await fetch(url);
-  if(!res.ok) {
+  if (!res.ok) {
     return null;
   }
 
   const content = await res.text();
   const moduleNameMatch = content.match(moduleNameRegExp);
-  if(moduleNameMatch === null) {
+  if (moduleNameMatch === null) {
     return null;
   }
   const [_, version] = decomposePackageNameVersion(moduleNameMatch[1]);
   return version;
-}
-const resolveEsmSh = async function(pkgName: string, versionRange: string) {
+};
+const resolveEsmSh = async function (pkgName: string, versionRange: string) {
   const latestUrl = `https://esm.sh/${pkgName}`;
   const latestInRangeUrl = `${latestUrl}@${versionRange}`;
 
   const latest = await getEsmShVersion(latestUrl);
   const latestInRange = await getEsmShVersion(latestInRangeUrl);
-  if(latest === null || latestInRange === null) {
+  if (latest === null || latestInRange === null) {
     return null;
   }
   return { latest, latestInRange };
-}
+};
 
 interface GetVersionsOptions {
   level: 'major' | 'minor' | 'patch';
@@ -114,10 +117,13 @@ const getLatestVersions = async function (
   type: typeof moduleTypes[keyof typeof moduleTypes],
   name: string,
   version: string,
-  options: GetVersionsOptions
+  options: GetVersionsOptions,
 ) {
   const semverOption = { includePrerelease: options.usePrerelease };
-  if(type === moduleTypes.denoLand || type === moduleTypes.npmPackage || type === moduleTypes.rawGitHub) {
+  if (
+    type === moduleTypes.denoLand || type === moduleTypes.npmPackage ||
+    type === moduleTypes.rawGitHub
+  ) {
     const cacheName = type + ':' + name;
     const cachedVersionList = versionListCache.get(cacheName);
 
@@ -125,38 +131,42 @@ const getLatestVersions = async function (
     if (typeof cachedVersionList !== 'undefined') {
       versionList = cachedVersionList;
     } else {
-      if(type === moduleTypes.denoLand) {
+      if (type === moduleTypes.denoLand) {
         versionList = await resolveDenoLandPackage(name);
-      } else if(type === moduleTypes.npmPackage) {
+      } else if (type === moduleTypes.npmPackage) {
         versionList = await resolveNpmPackage(name);
-      } else if(type === moduleTypes.rawGitHub) {
+      } else if (type === moduleTypes.rawGitHub) {
         versionList = await resolveRawGitHubContent(name, options.gitHubToken);
       }
 
       versionListCache.set(cacheName, versionList);
     }
 
-    if(versionList === null || versionList.length < 1) {
+    if (versionList === null || versionList.length < 1) {
       return null;
     }
 
     const versionListInRange = versionList
       .filter((ver) => semver.satisfies(ver, version, semverOption));
-    if(versionListInRange.length < 1) {
+    if (versionListInRange.length < 1) {
       return null;
     }
     const latestInRange = getLargestVersion(versionListInRange);
 
-
-    const versionGreaterRange = calcLatestVersionRange(latestInRange, options.level);
+    const versionGreaterRange = calcLatestVersionRange(
+      latestInRange,
+      options.level,
+    );
     const versionListGreater = versionList
-      .filter((ver) => semver.satisfies(ver, versionGreaterRange, semverOption));
+      .filter((ver) =>
+        semver.satisfies(ver, versionGreaterRange, semverOption)
+      );
 
     return {
       latest: getLargestVersion(versionListGreater),
       latestInRange: latestInRange,
     };
-  } else if(type === moduleTypes.esmSh) {
+  } else if (type === moduleTypes.esmSh) {
     return resolveEsmSh(name, version);
   }
 
