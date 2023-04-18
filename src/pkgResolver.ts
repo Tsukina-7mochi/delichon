@@ -99,8 +99,8 @@ const resolveEsmSh = async function (pkgName: string, versionRange: string) {
   const latestUrl = `https://esm.sh/${pkgName}`;
   const latestInRangeUrl = `${latestUrl}@${versionRange}`;
 
-  const latest = await getEsmShVersion(latestUrl);
-  const latestInRange = await getEsmShVersion(latestInRangeUrl);
+  const latest = semver.parse(await getEsmShVersion(latestUrl));
+  const latestInRange = semver.parse(await getEsmShVersion(latestInRangeUrl));
   if (latest === null || latestInRange === null) {
     return null;
   }
