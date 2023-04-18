@@ -1,6 +1,7 @@
 import * as semver from 'semver';
 import { SemVer } from 'semver';
 import moduleTypes from './moduleTypes.ts';
+import { decomposePackageNameVersion } from './util.ts';
 
 const getLargestVersion = (versions: SemVer[]) =>
   versions.reduce((max, ver) => semver.gt(ver, max) ? ver : max);
@@ -76,6 +77,33 @@ const resolveRawGitHubContent = async function (
   return versions;
 };
 
+const getEsmShVersion = async function(url: string) {
+  const moduleNameRegExp = /^\/\* esm.sh - (\S+) \*\//;
+  const res = await fetch(url);
+  if(!res.ok) {
+    return null;
+  }
+
+  const content = await res.text();
+  const moduleNameMatch = content.match(moduleNameRegExp);
+  if(moduleNameMatch === null) {
+    return null;
+  }
+  const [_, version] = decomposePackageNameVersion(moduleNameMatch[1]);
+  return version;
+}
+const resolveEsmSh = async function(pkgName: string, versionRange: string) {
+  const latestUrl = `https://esm.sh/${pkgName}`;
+  const latestInRangeUrl = `${latestUrl}@${versionRange}`;
+
+  const latest = await getEsmShVersion(latestUrl);
+  const latestInRange = await getEsmShVersion(latestInRangeUrl);
+  if(latest === null || latestInRange === null) {
+    return null;
+  }
+  return { latest, latestInRange };
+}
+
 interface GetVersionsOptions {
   level: 'major' | 'minor' | 'patch';
   usePrerelease: boolean;
@@ -128,6 +156,8 @@ const getLatestVersions = async function (
       latest: getLargestVersion(versionListGreater),
       latestInRange: latestInRange,
     };
+  } else if(type === moduleTypes.esmSh) {
+    return resolveEsmSh(name, version);
   }
 
   return null;

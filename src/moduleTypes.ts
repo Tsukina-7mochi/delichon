@@ -2,6 +2,7 @@ const moduleTypes = {
   denoLand: 'deno_land',
   npmPackage: 'npm_package',
   rawGitHub: 'raw_github',
+  esmSh: 'esm_sh',
   unknown: 'unknown',
 } as const;
 
