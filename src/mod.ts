@@ -27,14 +27,9 @@ const main = async function () {
     usePrerelease: false,
     level: 'major',
   });
-  if (
-    appVersionCheckResult &&
-    appVersionCheckResult.outdated !== 'none'
-  ) {
-    if (appVersionCheckResult.outdated !== 'not_found') {
-      console.log(`Update ${appVersionCheckResult.latest} found`);
-      console.log('You can update with $\x1b[33mdeno cache --reload\x1b[0m');
-    }
+  if (appVersionCheckResult.found && appVersionCheckResult.outdated) {
+    console.log(`Update ${appVersionCheckResult.latestVersion} found`);
+    console.log('You can update with $\x1b[33mdeno cache --reload\x1b[0m');
   }
 
   const command = new cliffy.Command()
@@ -84,18 +79,16 @@ const main = async function () {
   const modules = [...moduleMap.values()];
 
   // check updates
-  const results: [Module, ModuleVersionCheckResult][] = [];
+  const results: ModuleVersionCheckResult[] = [];
   for (const module of modules) {
     const result = await checkModuleVersion(module, {
       level,
       usePrerelease,
     });
 
-    if (result === null) {
+    if (!result.found) {
       console.log(`❔${module.name} cannot be resolved (${module.type})`);
-    } else if (result.outdated === 'not_found') {
-      console.log(`❔ ${module.name} not found on remote (${module.type})`);
-    } else if (result.outdated === 'none') {
+    } else if (result.outdatedLevel === 'none') {
       if (result.fixed) {
         console.log(`✅ ${module.name} is up to date`);
       } else {
@@ -103,32 +96,30 @@ const main = async function () {
       }
     } else {
       if (result.fixed) {
-        console.log(`❌ ${module.name} is outdated (${result.outdated})`);
+        console.log(`❌ ${module.name} is outdated (${result.outdatedLevel})`);
       } else {
         console.log(
-          `❌ ${module.name} is outdated (${result.outdated}) and version is not fixed`,
+          `❌ ${module.name} is outdated (${result.outdatedLevel}) and version is not fixed`,
         );
       }
     }
 
-    if (result !== null) {
-      results.push([
-        module,
-        result,
-      ]);
-    }
+    results.push(result);
   }
 
-  // show result
-  const outdatedModules = results.filter(([, result]) => {
-    return result.outdated !== 'none' && result.outdated !== 'not_found';
-  });
-  const notFoundModules = results.filter(([_, result]) =>
-    result.outdated === 'not_found'
-  );
-  const notFixedModules = results.filter(([_, result]) => !result.fixed);
-
+  //// show result ////
   console.log();
+
+  // type guards for version check result
+  const isFound = (item: ModuleVersionCheckResult):
+    item is (ModuleVersionCheckResult & {found: true}) => item.found;
+  const isNotFound = (item: ModuleVersionCheckResult):
+   item is (ModuleVersionCheckResult & {found: false}) => !item.found;
+
+  const outdatedModules = results.filter(isFound).filter(result => result.outdated);
+  const notFoundModules = results.filter(isNotFound);
+  const notFixedModules = results.filter(result => !result.fixed);
+
   console.log(
     `\x1b[1m${outdatedModules.length}\x1b[0m module${
       outdatedModules.length > 1 ? 's are' : ' is'
@@ -137,13 +128,13 @@ const main = async function () {
   if (notFoundModules.length > 0) {
     console.log('Could not find following modules:');
     console.log(
-      '  ' + notFoundModules.map(([module]) => module.name).join(', '),
+      '  ' + notFoundModules.map((result) => result.module.name).join(', '),
     );
   }
   if (notFixedModules.length > 0) {
     console.log('Version not fixed at following modules:');
     console.log(
-      '  ' + notFixedModules.map(([module]) => module.name).join(', '),
+      '  ' + notFixedModules.map((result) => result.module.name).join(', '),
     );
   }
 
@@ -159,12 +150,12 @@ const main = async function () {
       'none': 'Latest',
       'not_found': 'Not Found',
     };
-    for (const [module, result] of outdatedModules) {
+    for (const result of outdatedModules) {
       logTable.push([
-        `${outdatedTextMap[result.outdated]}`,
-        module.name,
-        module.version ?? '(null)',
-        result.latest ?? '(null)',
+        `${outdatedTextMap[result.outdatedLevel]}`,
+        result.module.name,
+        result.module.version ?? '(null)',
+        result.latestVersion,
       ]);
     }
     const colWidths = new Array(logTable[0].length)
