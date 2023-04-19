@@ -7,6 +7,7 @@ import checkModuleVersion, {
 } from './moduleVersionChecker.ts';
 import { configurations as fileConfigs } from './files.ts';
 import appInfo from '../app.json' assert { type: 'json' };
+import { buildTableString } from './util.ts';
 
 const enumerateFiles = async function* (basePath: string, files: string[]) {
   for (const filename of files) {
@@ -111,14 +112,18 @@ const main = async function () {
   console.log();
 
   // type guards for version check result
-  const isFound = (item: ModuleVersionCheckResult):
-    item is (ModuleVersionCheckResult & {found: true}) => item.found;
-  const isNotFound = (item: ModuleVersionCheckResult):
-   item is (ModuleVersionCheckResult & {found: false}) => !item.found;
+  const isFound = (
+    item: ModuleVersionCheckResult,
+  ): item is ModuleVersionCheckResult & { found: true } => item.found;
+  const isNotFound = (
+    item: ModuleVersionCheckResult,
+  ): item is ModuleVersionCheckResult & { found: false } => !item.found;
 
-  const outdatedModules = results.filter(isFound).filter(result => result.outdated);
+  const outdatedModules = results.filter(isFound).filter((result) =>
+    result.outdated
+  );
   const notFoundModules = results.filter(isNotFound);
-  const notFixedModules = results.filter(result => !result.fixed);
+  const notFixedModules = results.filter((result) => !result.fixed);
 
   console.log(
     `\x1b[1m${outdatedModules.length}\x1b[0m module${
@@ -139,7 +144,7 @@ const main = async function () {
   }
 
   if (outdatedModules.length > 0) {
-    let logTable: string[][] = [
+    const logTable: string[][] = [
       ['', 'package', 'current', 'latest'],
     ];
     const outdatedTextMap = {
@@ -158,27 +163,8 @@ const main = async function () {
         result.latestVersion,
       ]);
     }
-    const colWidths = new Array(logTable[0].length)
-      .fill(0)
-      .map((_, i) =>
-        logTable.reduce(
-          (max, arr) => arr[i].length > max ? arr[i].length : max,
-          0,
-        )
-      );
-
-    logTable = logTable.map((arr) =>
-      arr.map((v, i) =>
-        `${v}${' '.repeat(colWidths[i])}`.slice(0, colWidths[i])
-      )
-    );
-    // adjust for ANSI escape sequence
-    colWidths[0] = 5;
-    logTable[0][0] = '     ';
-
-    console.log(logTable[0].join(' '));
-    console.log(colWidths.map((len) => '-'.repeat(len)).join(' '));
-    console.log(logTable.slice(1).map((arr) => arr.join(' ')).join('\n'));
+    const logTableStr = buildTableString(logTable, true);
+    console.log(logTableStr);
   }
 };
 
