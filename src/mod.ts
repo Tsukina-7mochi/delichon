@@ -72,7 +72,7 @@ const main = async function () {
     for (const config of fileConfigs) {
       if (config.file === globName) {
         config.resolver(content).forEach((module) => {
-          moduleMap.set(`${module.type}-${module.name}`, module);
+          moduleMap.set(`${module.type}-${module.name}-${module.version}`, module);
         });
       }
     }
