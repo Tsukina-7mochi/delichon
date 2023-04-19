@@ -15,9 +15,6 @@ const decomposePackageNameVersion = function (
   }
 };
 
-const matchStringOrRegExp = (test: string | RegExp, target: string) =>
-  (typeof test === 'string') ? test === target : test.test(target);
-
 const buildTableString = function (table: string[][], headSeparator = false) {
   // deno-lint-ignore no-control-regex
   const ansiEscRegExp = /\x1b\[\d+(;\d+)*m/g;
@@ -58,4 +55,4 @@ const buildTableString = function (table: string[][], headSeparator = false) {
   return paddedTable.map((row) => row.join(' ')).join('\n');
 };
 
-export { buildTableString, decomposePackageNameVersion, matchStringOrRegExp };
+export { buildTableString, decomposePackageNameVersion };
