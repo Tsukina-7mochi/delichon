@@ -1,6 +1,6 @@
 import * as semver from 'semver';
 import { Module } from './moduleTypes.ts';
-import { getLatestVersions } from './pkgResolver.ts';
+import { getLatestVersions } from './moduleVersionResolver.ts';
 
 interface ModuleVersionCheckOptions {
   level: 'major' | 'minor' | 'patch';
