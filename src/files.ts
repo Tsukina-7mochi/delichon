@@ -31,6 +31,14 @@ const isDenoProject = (cwd: string) => {
   return false;
 };
 
+const denoFileResolver = (content: string) =>
+  fileResolver.resolveImportMap(content, [
+    moduleNameParser.denoLandUrlParser,
+    moduleNameParser.rawGitHubUrlParser,
+    moduleNameParser.denoNpmModuleParser,
+    moduleNameParser.esmShModuleParser,
+  ]);
+
 const npmPackageJson: FileConfig = {
   file: 'package.json',
   resolver: (content) => {
@@ -41,37 +49,19 @@ const npmPackageJson: FileConfig = {
 const denoImportMap: FileConfig = {
   file: 'import_map.json',
   enabled: isDenoProject,
-  resolver: (content) => {
-    return fileResolver.resolveImportMap(content, [
-      moduleNameParser.denoLandUrlParser,
-      moduleNameParser.rawGitHubUrlParser,
-      moduleNameParser.denoNpmModuleParser,
-    ]);
-  },
+  resolver: denoFileResolver,
 };
 
 const denoDepsTs: FileConfig = {
   file: 'deps.ts',
   enabled: isDenoProject,
-  resolver: (content) => {
-    return fileResolver.resolveDenoModuleNameStrings(content, [
-      moduleNameParser.denoLandUrlParser,
-      moduleNameParser.rawGitHubUrlParser,
-      moduleNameParser.denoNpmModuleParser,
-    ]);
-  },
+  resolver: denoFileResolver,
 };
 
 const denoDepsJs: FileConfig = {
   file: '**/deps.js',
   enabled: isDenoProject,
-  resolver: (content) => {
-    return fileResolver.resolveDenoModuleNameStrings(content, [
-      moduleNameParser.denoLandUrlParser,
-      moduleNameParser.rawGitHubUrlParser,
-      moduleNameParser.denoNpmModuleParser,
-    ]);
-  },
+  resolver: denoFileResolver,
 };
 
 const configurations = [

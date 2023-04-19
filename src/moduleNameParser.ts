@@ -48,6 +48,20 @@ const denoNpmModuleParser: ModuleNameParser = {
   },
 };
 
+const esmShModuleParser: ModuleNameParser = {
+  test: /^https?:\/\/esm.sh/,
+  parse: (moduleName) => {
+    const path = new URL(moduleName).pathname.split('/').slice(1);
+    const [name, version] = decomposePackageNameVersion(path[0]);
+
+    return {
+      type: moduleTypes.esmSh,
+      name,
+      version,
+    };
+  },
+};
+
 const parseModuleName = function (
   url: string,
   parsers: ModuleNameParser[],
@@ -66,6 +80,7 @@ export type { ModuleNameParser };
 export {
   denoLandUrlParser,
   denoNpmModuleParser,
+  esmShModuleParser,
   parseModuleName,
   rawGitHubUrlParser,
 };
