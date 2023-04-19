@@ -52,7 +52,7 @@ const checkModuleVersion = async function (
   const latestVerInRange = latestVersions.latestInRange;
 
   let outdatedLevel: ModuleVersionCheckResultFound['outdatedLevel'] = 'none';
-  if(semver.gt(latestVer, latestVerInRange, { includePrerelease: true })) {
+  if (semver.gt(latestVer, latestVerInRange, { includePrerelease: true })) {
     if (latestVer.major > latestVerInRange.major) {
       outdatedLevel = 'major';
     } else if (latestVer.minor > latestVerInRange.minor) {
