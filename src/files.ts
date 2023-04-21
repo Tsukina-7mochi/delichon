@@ -11,7 +11,7 @@ interface FileConfig {
   file: string;
   enabled?: (cwd: string) => boolean;
   resolver: (content: string) => Module[];
-  replacer: (content: string, versions: [string, string][]) => void;
+  replacer: (content: string, versions: [string, string][]) => string;
 }
 
 const isDenoProjectCache = new Map<string, boolean>();
@@ -97,5 +97,7 @@ const configurations = [
   denoDepsTs,
   denoDepsJs,
 ];
+
+export type { FileConfig };
 
 export { configurations };

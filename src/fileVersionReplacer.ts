@@ -37,7 +37,7 @@ const replaceImportMapVersions = function(
 
   for(const key in importmap.imports) {
     for(const [name, version] of versions) {
-      const replaced = replaceModuleVersion(importmap.imports[key], replacers, version);
+      const replaced = replaceModuleVersion(importmap.imports[key], name, replacers, version);
       if(typeof replaced === 'string') {
         importmap.imports[key] = replaced;
         break;
@@ -48,7 +48,7 @@ const replaceImportMapVersions = function(
   for(const scopeKey in importmap.scopes) {
     for(const key in importmap.scopes[scopeKey]) {
       for(const [name, version] of versions) {
-        const replaced = replaceModuleVersion(importmap.scopes[scopeKey][key], replacers, version);
+        const replaced = replaceModuleVersion(importmap.scopes[scopeKey][key], name, replacers, version);
         if(typeof replaced === 'string') {
           importmap.scopes[scopeKey][key] = replaced;
           break;
@@ -77,8 +77,8 @@ const replaceDenoModuleNameStringVersions = function(
   let content = content_;
   for(const regExp of regExps) {
     content = content.replaceAll(regExp, (moduleName) => {
-      for(const [_, version] of versions) {
-        const replaced = replaceModuleVersion(moduleName, replacers, version);
+      for(const [name, version] of versions) {
+        const replaced = replaceModuleVersion(moduleName, name, replacers, version);
         if(typeof replaced === 'string') {
           return replaced
         }

@@ -49,16 +49,20 @@ const updateVersionRange = function(range: string, version: SemVer) {
 
 interface ModuleVersionReplacer {
   test: RegExp;
-  replace: (moduleName: string, version: string) => string;
+  replace: (moduleName: string, nameTest: string, version: string) => string | null;
 }
 
 const denoLandUrlReplacer: ModuleVersionReplacer = {
   test: /^https?:\/\/deno.land/,
-  replace: (moduleName, version) => {
+  replace: (moduleName, nameTest, version) => {
     const url = new URL(moduleName);
     const path = url.pathname.split('/').slice(1);
     const pkgStr = path[0] === 'x' ? path[1] : path[0];
     const [name, _] = decomposePackageNameVersion(pkgStr);
+
+    if(name !== nameTest) {
+      return null;
+    }
 
     path[path[0] === 'x' ? 1 : 0] = `${name}@${version}`;
 
@@ -68,9 +72,14 @@ const denoLandUrlReplacer: ModuleVersionReplacer = {
 
 const rawGitHubUrlReplacer: ModuleVersionReplacer = {
   test: /^https?:\/\/raw.githubusercontent.com/,
-  replace: (moduleName, version) => {
+  replace: (moduleName, nameTest, version) => {
     const url = new URL(moduleName);
     const path = url.pathname.split('/').slice(1);
+    const name = `${path[0]}/${path[1]}`;
+
+    if(name !== nameTest) {
+      return null;
+    }
 
     path[2] = version;
 
@@ -80,18 +89,27 @@ const rawGitHubUrlReplacer: ModuleVersionReplacer = {
 
 const denoNpmModuleReplacer: ModuleVersionReplacer = {
   test: /^npm:/,
-  replace: (moduleName, version) => {
+  replace: (moduleName, nameTest, version) => {
     const [name, _] = decomposePackageNameVersion(moduleName.slice(4));
+
+    if(name !== nameTest) {
+      return null;
+    }
+
     return `npm:${name}@${version}`;
   }
 }
 
 const esmShModuleReplacer: ModuleVersionReplacer = {
   test: /^https?:\/\/esm.sh/,
-  replace: (moduleName, version) => {
+  replace: (moduleName, nameTest, version) => {
     const url = new URL(moduleName);
     const path = url.pathname.split('/').slice(1);
     const [name, _] = decomposePackageNameVersion(path[0]);
+
+    if(name !== nameTest) {
+      return null;
+    }
 
     return `https://esm.sh/${name}@${version}${url.search}`;
   }
@@ -99,12 +117,17 @@ const esmShModuleReplacer: ModuleVersionReplacer = {
 
 const replaceModuleVersion = function(
   moduleName: string,
+  nameTest: string,
   replacers: ModuleVersionReplacer[],
   version: string
 ): ReturnType<ModuleVersionReplacer['replace']> | null {
   for(const replacer of replacers) {
     if(replacer.test.test(moduleName)) {
-      return replacer.replace(moduleName, version);
+      const replaced = replacer.replace(moduleName, nameTest, version);
+
+      if(replaced !== null) {
+        return replaced;
+      }
     }
   }
 
