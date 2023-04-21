@@ -1,17 +1,6 @@
 import { ModuleNameParser, parseModuleName } from './moduleNameParser.ts';
 import { default as moduleTypes, Module } from './moduleTypes.ts';
-
-interface Importmap {
-  imports?: { [key: string]: string };
-  scope?: {
-    [key: string]: { [key: string]: string };
-  };
-}
-
-type PackageJson = Required<{
-  dependencies: { [key: string]: string };
-  devDependencies: { [key: string]: string };
-}>;
+import { Importmap, PackageJson } from './fileTypes.ts';
 
 const resolvePackageJson = function (content: string): Module[] {
   const packageJson = JSON.parse(content) as PackageJson;
@@ -55,7 +44,7 @@ const resolveImportMap = function (
 
   const moduleNames = [
     ...Object.values(importmap?.imports ?? {}),
-    ...Object.values(importmap?.scope ?? {})
+    ...Object.values(importmap?.scopes ?? {})
       .flatMap((map) => Object.values(map)),
   ];
 

@@ -111,6 +111,8 @@ const replaceModuleVersion = function(
   return null;
 }
 
+export type { ModuleVersionReplacer };
+
 export {
   updateVersionRange,
   denoLandUrlReplacer,
