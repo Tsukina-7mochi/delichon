@@ -1,4 +1,5 @@
 import { SemVer } from 'semver';
+import { decomposePackageNameVersion } from './util.ts';
 
 const isIntegerString = (str: unknown) =>
   typeof str === 'string' && isFinite(parseInt(str));
@@ -46,6 +47,75 @@ const updateVersionRange = function(range: string, version: SemVer) {
   return newRange;
 }
 
+interface ModuleVersionReplacer {
+  test: RegExp;
+  replace: (moduleName: string, version: string) => string;
+}
+
+const denoLandUrlReplacer: ModuleVersionReplacer = {
+  test: /^https?:\/\/deno.land/,
+  replace: (moduleName, version) => {
+    const url = new URL(moduleName);
+    const path = url.pathname.split('/').slice(1);
+    const pkgStr = path[0] === 'x' ? path[1] : path[0];
+    const [name, _] = decomposePackageNameVersion(pkgStr);
+
+    path[path[0] === 'x' ? 1 : 0] = `${name}@${version}`;
+
+    return `https://deno.land/${path.join('/')}${url.search}`;
+  }
+}
+
+const rawGitHubUrlReplacer: ModuleVersionReplacer = {
+  test: /^https?:\/\/raw.githubusercontent.com/,
+  replace: (moduleName, version) => {
+    const url = new URL(moduleName);
+    const path = url.pathname.split('/').slice(1);
+
+    path[2] = version;
+
+    return `https://raw.githubusercontent.com/${path.join('/')}${url.search}`;
+  }
+}
+
+const denoNpmModuleReplacer: ModuleVersionReplacer = {
+  test: /^npm:/,
+  replace: (moduleName, version) => {
+    const [name, _] = decomposePackageNameVersion(moduleName.slice(4));
+    return `npm:${name}@${version}`;
+  }
+}
+
+const esmShModuleReplacer: ModuleVersionReplacer = {
+  test: /^https?:\/\/esm.sh/,
+  replace: (moduleName, version) => {
+    const url = new URL(moduleName);
+    const path = url.pathname.split('/').slice(1);
+    const [name, _] = decomposePackageNameVersion(path[0]);
+
+    return `https://esm.sh/${name}@${version}${url.search}`;
+  }
+}
+
+const replaceModuleVersion = function(
+  moduleName: string,
+  replacers: ModuleVersionReplacer[],
+  version: string
+): ReturnType<ModuleVersionReplacer['replace']> | null {
+  for(const replacer of replacers) {
+    if(replacer.test.test(moduleName)) {
+      return replacer.replace(moduleName, version);
+    }
+  }
+
+  return null;
+}
+
 export {
   updateVersionRange,
+  denoLandUrlReplacer,
+  rawGitHubUrlReplacer,
+  denoNpmModuleReplacer,
+  esmShModuleReplacer,
+  replaceModuleVersion,
 };
