@@ -128,7 +128,6 @@ const replaceDenoModuleNameStringVersions = function (
           version,
         );
         if (typeof replaced === 'string') {
-
           return quote + replaced + quote;
         }
       }
