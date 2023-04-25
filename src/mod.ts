@@ -20,7 +20,7 @@ const enumerateFiles = async function* (basePath: string, files: string[]) {
   }
 };
 
-const printVersionCheckResult = function(results: ModuleVersionCheckResult[]) {
+const printVersionCheckResult = function (results: ModuleVersionCheckResult[]) {
   // type guards for version check result
   const isFound = (
     item: ModuleVersionCheckResult,
@@ -76,7 +76,7 @@ const printVersionCheckResult = function(results: ModuleVersionCheckResult[]) {
     const logTableStr = buildTableString(logTable, true);
     console.log(logTableStr);
   }
-}
+};
 
 const main = async function () {
   const appVersionCheckResult = await checkModuleVersion({
@@ -138,7 +138,7 @@ const main = async function () {
     }
   }
 
-  for(const [path, config] of fileConfigMap.entries()) {
+  for (const [path, config] of fileConfigMap.entries()) {
     const content = await Deno.readTextFile(path);
 
     config.resolver(content).forEach((module) => {
@@ -182,7 +182,7 @@ const main = async function () {
   printVersionCheckResult(results);
 
   // update
-  if(doUpdate) {
+  if (doUpdate) {
     await updateVersion(results, doFix, fileConfigMap);
   }
 };
