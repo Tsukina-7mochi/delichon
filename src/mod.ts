@@ -117,7 +117,9 @@ const main = async function () {
   const usePrerelease = options.prerelease === true;
   const doUpdate = options.update === true;
   const doFix = options.fix === true;
-  const gitHubToken = typeof options.ghToken === 'string' ? options.ghToken : undefined;
+  const gitHubToken = typeof options.ghToken === 'string'
+    ? options.ghToken
+    : undefined;
 
   const cwd = args.filter((v) => typeof v === 'string')[0] ?? Deno.cwd();
   const fileGlobs: string[] = [];
@@ -156,7 +158,7 @@ const main = async function () {
     const result = await checkModuleVersion(module, {
       level,
       usePrerelease,
-      gitHubToken
+      gitHubToken,
     });
 
     if (!result.found) {
