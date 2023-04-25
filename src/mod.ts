@@ -101,6 +101,7 @@ const main = async function () {
     .option('-l, --level [level:string]', 'version update limit', {
       default: 'major',
     })
+    .option('--gh-token [token:string]', 'GitHub token to use GitHub API')
     .option('--prerelease', 'use prerelease')
     .arguments('[path]');
 
@@ -116,6 +117,7 @@ const main = async function () {
   const usePrerelease = options.prerelease === true;
   const doUpdate = options.update === true;
   const doFix = options.fix === true;
+  const gitHubToken = typeof options.ghToken === 'string' ? options.ghToken : undefined;
 
   const cwd = args.filter((v) => typeof v === 'string')[0] ?? Deno.cwd();
   const fileGlobs: string[] = [];
@@ -154,6 +156,7 @@ const main = async function () {
     const result = await checkModuleVersion(module, {
       level,
       usePrerelease,
+      gitHubToken
     });
 
     if (!result.found) {

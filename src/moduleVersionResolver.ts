@@ -61,7 +61,7 @@ const resolveRawGitHubContent = async function (
   };
   if (typeof token === 'string') {
     Object.defineProperty(headers, 'Authorization', {
-      value: `Bearer ${token}`,
+      value: `Barer ${token}`,
     });
   }
 
