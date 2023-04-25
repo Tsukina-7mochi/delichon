@@ -1,31 +1,32 @@
 import { ModuleVersionReplacer, replaceModuleVersion } from "./moduleVersionReplacer.ts";
-import { Importmap, PackageJson } from './fileTypes.ts';
+import { JSONParser, replaceJSONValue } from 'json-edit';
+import { Importmap } from "./fileTypes.ts";
 
 const replacePackageJsonVersions = function(
   content: string,
   versions: [string, string][],
 ) {
-  const packageJson = JSON.parse(content) as PackageJson;
+  const packageJson = JSONParser.parse(content);
 
-  for(const moduleName in packageJson.dependencies) {
-    for(const [name, version] of versions) {
-      if(moduleName === name) {
-        packageJson.dependencies[moduleName] = version;
-        break;
-      }
+  for(const [name, version] of versions) {
+    try {
+      replaceJSONValue(packageJson, ['dependencies', name], JSON.stringify(version));
+      continue;
+    } catch {
+      // just erase error
     }
+
+    try {
+      replaceJSONValue(packageJson, ['devDependencies', name], JSON.stringify(version));
+      continue;
+    } catch {
+      // just erase error
+    }
+
+    console.error(`Failed to update ${name}`);
   }
 
-  for(const name in packageJson.devDependencies) {
-    for(const [moduleName, moduleVersion] of versions) {
-      if(name === moduleName) {
-        packageJson.devDependencies[name] = moduleVersion;
-        break;
-      }
-    }
-  }
-
-  return JSON.stringify(packageJson);
+  return packageJson.stringify();
 }
 
 const replaceImportMapVersions = function(
@@ -34,13 +35,18 @@ const replaceImportMapVersions = function(
   replacers: ModuleVersionReplacer[]
 ) {
   const importmap = JSON.parse(content) as Importmap;
+  const importmapTree = JSONParser.parse(content);
 
   for(const key in importmap.imports) {
     for(const [name, version] of versions) {
       const replaced = replaceModuleVersion(importmap.imports[key], name, replacers, version);
       if(typeof replaced === 'string') {
-        importmap.imports[key] = replaced;
-        break;
+        try {
+          replaceJSONValue(importmapTree, ['imports', key], JSON.stringify(replaced));
+          break;
+        } catch {
+          console.error(`Failed to update ${name}`);
+        }
       }
     }
   }
@@ -50,14 +56,19 @@ const replaceImportMapVersions = function(
       for(const [name, version] of versions) {
         const replaced = replaceModuleVersion(importmap.scopes[scopeKey][key], name, replacers, version);
         if(typeof replaced === 'string') {
-          importmap.scopes[scopeKey][key] = replaced;
+          try {
+            replaceJSONValue(importmapTree, ['scopes', scopeKey, key], JSON.stringify(replaced));
+            break;
+          } catch {
+            console.error(`Failed to update ${name}`);
+          }
           break;
         }
       }
     }
   }
 
-  return JSON.stringify(importmap);
+  return importmapTree.stringify();
 }
 
 const replaceDenoModuleNameStringVersions = function(

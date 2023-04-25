@@ -168,6 +168,18 @@
     "https://deno.land/x/esbuild_cache_plugin@v0.2.0/deps.ts": "bddfaaf538e2807f19972e4e60f7231d4323fd18c91a944fbe524905d1f2b92f",
     "https://deno.land/x/esbuild_cache_plugin@v0.2.0/mod.ts": "7994fed1a64486636ff2dc1ba17c0182ebefdea41816700cfe9ba4bf46d78fad",
     "https://raw.githubusercontent.com/Tsukina-7mochi/esbuild-plugin-result-deno/v1.0.7/deps.ts": "f765b4330ab74c5dba622424acb3a4fb2b02751574c3a804a3873abd5576779f",
-    "https://raw.githubusercontent.com/Tsukina-7mochi/esbuild-plugin-result-deno/v1.0.7/mod.ts": "fb11c4ee4102510bfc58811cd3567f11df746b009b0bacc7b1110f79409a38a3"
+    "https://raw.githubusercontent.com/Tsukina-7mochi/esbuild-plugin-result-deno/v1.0.7/mod.ts": "fb11c4ee4102510bfc58811cd3567f11df746b009b0bacc7b1110f79409a38a3",
+    "https://raw.githubusercontent.com/Tsukina-7mochi/json-edit-formatted/v1.0.0/mod.ts": "ae460617f8a480adb109d1348b9367163733ac286b4814d16b8fdef28252b670",
+    "https://raw.githubusercontent.com/Tsukina-7mochi/json-edit-formatted/v1.0.0/src/editor.ts": "6a61a484a41a449a54669604c3e959fed234e9e421549057f598991f50e5f5d7",
+    "https://raw.githubusercontent.com/Tsukina-7mochi/json-edit-formatted/v1.0.0/src/mod.ts": "8b4c773dd1cf81396da9c587e4a4522c3d9e22e2f8ebc7e0456b75fa227278d8",
+    "https://raw.githubusercontent.com/Tsukina-7mochi/json-edit-formatted/v1.0.0/src/parser.ts": "d944c69998a97eb0bf31106354617d1a244298290b8e97971459959ee5518596",
+    "https://raw.githubusercontent.com/Tsukina-7mochi/json-edit-formatted/v1.1.0/mod.ts": "ae460617f8a480adb109d1348b9367163733ac286b4814d16b8fdef28252b670",
+    "https://raw.githubusercontent.com/Tsukina-7mochi/json-edit-formatted/v1.1.0/src/editor.ts": "6a61a484a41a449a54669604c3e959fed234e9e421549057f598991f50e5f5d7",
+    "https://raw.githubusercontent.com/Tsukina-7mochi/json-edit-formatted/v1.1.0/src/mod.ts": "8b4c773dd1cf81396da9c587e4a4522c3d9e22e2f8ebc7e0456b75fa227278d8",
+    "https://raw.githubusercontent.com/Tsukina-7mochi/json-edit-formatted/v1.1.0/src/parser.ts": "d4092a155a1c54d076c0d11231f3f707c7d5da819a98afcfcbf168ee8f560595",
+    "https://raw.githubusercontent.com/Tsukina-7mochi/json-edit-formatted/v1.2.0/mod.ts": "ae460617f8a480adb109d1348b9367163733ac286b4814d16b8fdef28252b670",
+    "https://raw.githubusercontent.com/Tsukina-7mochi/json-edit-formatted/v1.2.0/src/editor.ts": "53ca6b1d7b55bfb4b508a3a6feb799e06bb2aa4cf2a9c918082fb9462d8fa35b",
+    "https://raw.githubusercontent.com/Tsukina-7mochi/json-edit-formatted/v1.2.0/src/mod.ts": "8b4c773dd1cf81396da9c587e4a4522c3d9e22e2f8ebc7e0456b75fa227278d8",
+    "https://raw.githubusercontent.com/Tsukina-7mochi/json-edit-formatted/v1.2.0/src/parser.ts": "d4092a155a1c54d076c0d11231f3f707c7d5da819a98afcfcbf168ee8f560595"
   }
 }
