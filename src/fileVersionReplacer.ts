@@ -116,7 +116,10 @@ const replaceDenoModuleNameStringVersions = function (
 
   let content = content_;
   for (const regExp of regExps) {
-    content = content.replaceAll(regExp, (moduleName) => {
+    content = content.replaceAll(regExp, (moduleName_) => {
+      const moduleName = moduleName_.slice(1, -1);
+      const quote = moduleName_[0];
+
       for (const [name, version] of versions) {
         const replaced = replaceModuleVersion(
           moduleName,
@@ -125,10 +128,11 @@ const replaceDenoModuleNameStringVersions = function (
           version,
         );
         if (typeof replaced === 'string') {
-          return replaced;
+
+          return quote + replaced + quote;
         }
       }
-      return moduleName;
+      return moduleName_;
     });
   }
 
