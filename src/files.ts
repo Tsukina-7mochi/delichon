@@ -3,12 +3,15 @@ import * as posix from 'posix';
 import { Module } from './moduleTypes.ts';
 import * as moduleNameParser from './moduleNameParser.ts';
 import * as fileResolver from './fileResolver.ts';
+import * as moduleVersionReplacer from './moduleVersionReplacer.ts';
+import * as fileVersionReplacer from './fileVersionReplacer.ts';
+import { replacePackageJsonVersions } from './fileVersionReplacer.ts';
 
 interface FileConfig {
   file: string;
   enabled?: (cwd: string) => boolean;
   resolver: (content: string) => Module[];
-  // replacer
+  replacer: (content: string, versions: [string, string][]) => string;
 }
 
 const isDenoProjectCache = new Map<string, boolean>();
@@ -31,37 +34,79 @@ const isDenoProject = (cwd: string) => {
   return false;
 };
 
-const denoFileResolver = (content: string) =>
-  fileResolver.resolveImportMap(content, [
-    moduleNameParser.denoLandUrlParser,
-    moduleNameParser.rawGitHubUrlParser,
-    moduleNameParser.denoNpmModuleParser,
-    moduleNameParser.esmShModuleParser,
-  ]);
+const denoModuleNameParsers = [
+  moduleNameParser.denoLandUrlParser,
+  moduleNameParser.rawGitHubUrlParser,
+  moduleNameParser.denoNpmModuleParser,
+  moduleNameParser.esmShModuleParser,
+];
+
+const denoModuleVersionReplacers = [
+  moduleVersionReplacer.denoLandUrlReplacer,
+  moduleVersionReplacer.rawGitHubUrlReplacer,
+  moduleVersionReplacer.denoNpmModuleReplacer,
+  moduleVersionReplacer.esmShModuleReplacer,
+];
 
 const npmPackageJson: FileConfig = {
   file: 'package.json',
   resolver: (content) => {
     return fileResolver.resolvePackageJson(content);
   },
+  replacer: (content, versions) => {
+    return replacePackageJsonVersions(content, versions);
+  },
 };
 
 const denoImportMap: FileConfig = {
   file: 'import_map.json',
   enabled: isDenoProject,
-  resolver: denoFileResolver,
+  resolver: (content) => {
+    return fileResolver.resolveImportMap(content, denoModuleNameParsers);
+  },
+  replacer: (content, versions) => {
+    return fileVersionReplacer.replaceImportMapVersions(
+      content,
+      versions,
+      denoModuleVersionReplacers,
+    );
+  },
 };
 
 const denoDepsTs: FileConfig = {
   file: 'deps.ts',
   enabled: isDenoProject,
-  resolver: denoFileResolver,
+  resolver: (content) => {
+    return fileResolver.resolveDenoModuleNameStrings(
+      content,
+      denoModuleNameParsers,
+    );
+  },
+  replacer: (content, versions) => {
+    return fileVersionReplacer.replaceDenoModuleNameStringVersions(
+      content,
+      versions,
+      denoModuleVersionReplacers,
+    );
+  },
 };
 
 const denoDepsJs: FileConfig = {
   file: '**/deps.js',
   enabled: isDenoProject,
-  resolver: denoFileResolver,
+  resolver: (content) => {
+    return fileResolver.resolveDenoModuleNameStrings(
+      content,
+      denoModuleNameParsers,
+    );
+  },
+  replacer: (content, versions) => {
+    return fileVersionReplacer.replaceDenoModuleNameStringVersions(
+      content,
+      versions,
+      denoModuleVersionReplacers,
+    );
+  },
 };
 
 const configurations = [
@@ -70,5 +115,7 @@ const configurations = [
   denoDepsTs,
   denoDepsJs,
 ];
+
+export type { FileConfig };
 
 export { configurations };
