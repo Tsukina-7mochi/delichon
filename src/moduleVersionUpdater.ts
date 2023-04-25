@@ -13,21 +13,22 @@ const updateVersion = async function (
   for (const result of results) {
     if (!result.found) continue;
     if (!result.outdated) continue;
-    if (typeof result.module.version !== 'string') continue;
+
+    const module = result.module;
+    if (typeof module.version !== 'string') continue;
 
     const latestVersion = semver.parse(result.latestVersion);
     if (latestVersion === null) continue;
 
     const targetVersion = doFix
       ? result.latestVersion
-      : updateVersionRange(result.module.version, latestVersion);
+      : updateVersionRange(module.version, latestVersion);
 
     if (targetVersion === null) continue;
 
-    versions.push([result.module.name, targetVersion]);
+    console.log(`\x1b[32mUpdate\x1b[0m ${module.name}: ${module.version} -> ${targetVersion}`);
+    versions.push([module.name, targetVersion]);
   }
-
-  console.log(versions);
 
   for (const [path, config] of fileConfigMap.entries()) {
     console.log(`Updating ${path}`);

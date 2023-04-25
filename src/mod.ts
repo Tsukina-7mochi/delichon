@@ -183,6 +183,7 @@ const main = async function () {
 
   // update
   if (doUpdate) {
+    console.log();
     await updateVersion(results, doFix, fileConfigMap);
   }
 };
