@@ -26,7 +26,9 @@ const updateVersion = async function (
 
     if (targetVersion === null) continue;
 
-    console.log(`\x1b[32mUpdate\x1b[0m ${module.name}: ${module.version} -> ${targetVersion}`);
+    console.log(
+      `\x1b[32mUpdate\x1b[0m ${module.name}: ${module.version} -> ${targetVersion}`,
+    );
     versions.push([module.name, targetVersion]);
   }
 
