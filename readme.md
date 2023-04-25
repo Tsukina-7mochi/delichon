@@ -20,3 +20,10 @@ Dependency scanner for Typescript/Javascript project
 ```sh
 $deno run --reload --allow-read --allow-net https://raw.githubusercontent.com/Tsukina-7mochi/delichon/deploy/mod.js
 ```
+
+### Options
+
+- `-u, --update`: Update dependencies automatically
+- `--fix`: Fix ranged versions to specific ones (e.g., `^1.2.3` -> `1.3.0` if version `1.3.0` is available)
+- `-l, --level [major|minor|patch]`: Version check limit
+- `--prerelease`: Use prerelease for version to update
