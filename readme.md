@@ -33,3 +33,4 @@ $deno cache --reload https://raw.githubusercontent.com/Tsukina-7mochi/delichon/d
 - `--fix`: Fix ranged versions to specific ones (e.g., `^1.2.3` -> `1.3.0` if version `1.3.0` is available)
 - `-l, --level [major|minor|patch]`: Version check limit
 - `--prerelease`: Use prerelease for version to update
+- `--gh-token {token}`: Specify GitHub token used when accessing GitHub API
