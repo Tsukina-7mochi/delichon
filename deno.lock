@@ -121,6 +121,7 @@
     "https://deno.land/x/cliffy@v0.25.7/table/row.ts": "5f519ba7488d2ef76cbbf50527f10f7957bfd668ce5b9169abbc44ec88302645",
     "https://deno.land/x/cliffy@v0.25.7/table/table.ts": "ec204c9d08bb3ff1939c5ac7412a4c9ed7d00925d4fc92aff9bfe07bd269258d",
     "https://deno.land/x/cliffy@v0.25.7/table/utils.ts": "187bb7dcbcfb16199a5d906113f584740901dfca1007400cba0df7dcd341bc29",
+    "https://raw.githubusercontent.com/Tsukina-7mochi/delichon/deploy/mod.js": "c456692baa975c8502fd22b4ba72f17e43c13c17b23d7b693de8d2d7a79c63a8",
     "https://raw.githubusercontent.com/Tsukina-7mochi/json-edit-formatted/v1.2.0/mod.ts": "ae460617f8a480adb109d1348b9367163733ac286b4814d16b8fdef28252b670",
     "https://raw.githubusercontent.com/Tsukina-7mochi/json-edit-formatted/v1.2.0/src/editor.ts": "53ca6b1d7b55bfb4b508a3a6feb799e06bb2aa4cf2a9c918082fb9462d8fa35b",
     "https://raw.githubusercontent.com/Tsukina-7mochi/json-edit-formatted/v1.2.0/src/mod.ts": "8b4c773dd1cf81396da9c587e4a4522c3d9e22e2f8ebc7e0456b75fa227278d8",
