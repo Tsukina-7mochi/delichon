@@ -15,7 +15,7 @@ const updateVersion = async function (
     if (!result.found) continue;
 
     const module = result.module;
-    if(doUpdate && result.outdated) {
+    if (doUpdate && result.outdated) {
       if (typeof module.version !== 'string') continue;
 
       const latestVersion = semver.parse(result.latestVersion);
@@ -31,7 +31,7 @@ const updateVersion = async function (
         `\x1b[32mUpdate\x1b[0m ${module.name}: ${module.version} -> ${targetVersion}`,
       );
       versions.push([module.name, targetVersion]);
-    } else if(doFix && !result.fixed) {
+    } else if (doFix && !result.fixed) {
       console.log(
         `\x1b[32mFix\x1b[0m ${module.name}: ${module.version} -> ${result.latestVersionInRange}`,
       );
