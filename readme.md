@@ -14,6 +14,7 @@ Dependency scanner for Typescript/Javascript project
 - registry.npmjs.org
 - deno.land
 - raw.githubusercontent.com
+- esm.sh
 
 ## Usage
 
