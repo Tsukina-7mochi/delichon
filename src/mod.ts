@@ -187,9 +187,9 @@ const main = async function () {
   printVersionCheckResult(results);
 
   // update
-  if (doUpdate) {
+  if (doUpdate || doFix) {
     console.log();
-    await updateVersion(results, doFix, fileConfigMap);
+    await updateVersion(results, doUpdate, doFix, fileConfigMap);
   }
 };
 

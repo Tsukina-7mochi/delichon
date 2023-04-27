@@ -5,6 +5,7 @@ import { updateVersionRange } from './moduleVersionReplacer.ts';
 
 const updateVersion = async function (
   results: ModuleVersionCheckResult[],
+  doUpdate: boolean,
   doFix: boolean,
   fileConfigMap: Map<string, FileConfig>,
 ) {
@@ -12,24 +13,30 @@ const updateVersion = async function (
 
   for (const result of results) {
     if (!result.found) continue;
-    if (!result.outdated) continue;
 
     const module = result.module;
-    if (typeof module.version !== 'string') continue;
+    if(doUpdate && result.outdated) {
+      if (typeof module.version !== 'string') continue;
 
-    const latestVersion = semver.parse(result.latestVersion);
-    if (latestVersion === null) continue;
+      const latestVersion = semver.parse(result.latestVersion);
+      if (latestVersion === null) continue;
 
-    const targetVersion = doFix
-      ? result.latestVersion
-      : updateVersionRange(module.version, latestVersion);
+      const targetVersion = doFix
+        ? result.latestVersion
+        : updateVersionRange(module.version, latestVersion);
 
-    if (targetVersion === null) continue;
+      if (targetVersion === null) continue;
 
-    console.log(
-      `\x1b[32mUpdate\x1b[0m ${module.name}: ${module.version} -> ${targetVersion}`,
-    );
-    versions.push([module.name, targetVersion]);
+      console.log(
+        `\x1b[32mUpdate\x1b[0m ${module.name}: ${module.version} -> ${targetVersion}`,
+      );
+      versions.push([module.name, targetVersion]);
+    } else if(doFix && !result.fixed) {
+      console.log(
+        `\x1b[32mFix\x1b[0m ${module.name}: ${module.version} -> ${result.latestVersionInRange}`,
+      );
+      versions.push([module.name, result.latestVersionInRange]);
+    }
   }
 
   for (const [path, config] of fileConfigMap.entries()) {
