@@ -1,12 +1,12 @@
 {
   "imports": {
     "cliffy": "https://deno.land/x/cliffy@v0.25.7/mod.ts",
-    "esbuild": "https://deno.land/x/esbuild@v0.17.18/mod.js",
-    "esbuild-plugin-result": "https://raw.githubusercontent.com/Tsukina-7mochi/esbuild-plugin-result-deno/v1.0.9/mod.ts",
-    "fs": "https://deno.land/std@0.186.0/fs/mod.ts",
+    "esbuild": "https://deno.land/x/esbuild@v0.17.19/mod.js",
+    "esbuild-plugin-result": "https://raw.githubusercontent.com/Tsukina-7mochi/esbuild-plugin-result-deno/v1.0.10/mod.ts",
+    "fs": "https://deno.land/std@0.189.0/fs/mod.ts",
     "json-edit": "https://raw.githubusercontent.com/Tsukina-7mochi/json-edit-formatted/v1.2.0/mod.ts",
-    "posix": "https://deno.land/std@0.186.0/path/mod.ts",
-    "semver": "https://deno.land/std@0.186.0/semver/mod.ts",
-    "testing/": "https://deno.land/std@0.186.0/testing/"
+    "posix": "https://deno.land/std@0.189.0/path/mod.ts",
+    "semver": "https://deno.land/std@0.189.0/semver/mod.ts",
+    "testing/": "https://deno.land/std@0.189.0/testing/"
   }
 }
